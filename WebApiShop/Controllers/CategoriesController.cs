@@ -1,5 +1,6 @@
 ﻿using DTO_s;
 using Enteties;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 
@@ -9,6 +10,7 @@ namespace WebApiShop.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class CategoriesController : ControllerBase
     {
         ICategoryService _iCategoryService;

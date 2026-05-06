@@ -1,6 +1,7 @@
 ﻿using DTO_s;
 using Enteties;
 using MailKit.Search;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -94,6 +95,7 @@ namespace WebApiShop.Controllers
         }
 
         [HttpPost]
+        [AuthorizeRoles(AppRoles.Admin)]
         public async Task<ActionResult<ProductDTO>> Post([FromBody] ProductDTO productDTO)
         {
             var created = await _iProtuctService.AddProduct(productDTO);
@@ -103,6 +105,7 @@ namespace WebApiShop.Controllers
 
         // PUT api/<ProductsController>/5
         [HttpPut("{id}")]
+        [AuthorizeRoles(AppRoles.Admin)]
         public async Task<IActionResult> Put(int id, [FromBody] ProductDTO productDTO)
         {
             var updated = await _iProtuctService.UpdateProduct(id, productDTO);
@@ -115,6 +118,7 @@ namespace WebApiShop.Controllers
 
         // DELETE api/<ProductsController>/5
         [HttpDelete("{id}")]
+        [AuthorizeRoles(AppRoles.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _iProtuctService.DeleteProduct(id);

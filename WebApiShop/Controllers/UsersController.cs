@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,7 +11,7 @@ namespace Enteties.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [Authorize]
     public class UsersController : ControllerBase
     {
         IUsersService _iUsersServicies;
@@ -23,6 +24,17 @@ namespace Enteties.Controllers
             _iUsersServicies = usersServicies;
             _logger = logger;
         }
+
+        private void AppendJwtCookie(string token)
+        {
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
+        }
         
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
@@ -33,23 +45,26 @@ namespace Enteties.Controllers
         
         // POST api/<UsersController>
         [HttpPost]
-
+        [AllowAnonymous]
         public async Task<ActionResult<UserDTO>> Post([FromBody] UserDTO value, string password)
         {
-            UserDTO user = await _iUsersServicies.AddNewUser(value, password);
-            if (user == null)
+            AuthResponseDTO? response = await _iUsersServicies.AddNewUser(value, password);
+            if (response == null)
                 return BadRequest("Password is too weak");
-            return CreatedAtAction(nameof(Get), new { user.id }, user);
+            AppendJwtCookie(response.Token);
+            return CreatedAtAction(nameof(Get), new { response.User.id }, response.User);
         }
         
         [HttpPost("login")]
-        public  async Task<ActionResult<User>> login([FromBody] ExisitingUser value)
+        [AllowAnonymous]
+        public async Task<ActionResult<UserDTO>> login([FromBody] ExisitingUser value)
         {
-            User user = await _iUsersServicies.Login(value);
-            if (user != null)
+            AuthResponseDTO? response = await _iUsersServicies.Login(value);
+            if (response != null)
             {
-                _logger.LogInformation("Login attempted with User Email: " + value.Email  + "and password: " + value.Password);
-                return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
+                _logger.LogInformation("Login attempted with User Email: " + value.Email);
+                AppendJwtCookie(response.Token);
+                return Ok(response.User);
             }
             _logger.LogError("Error in getting user");
             return Unauthorized();

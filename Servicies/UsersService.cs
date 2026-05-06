@@ -9,28 +9,37 @@ namespace Services
     {
         private readonly IUsersRepository _iUsersRepository;
         private readonly IpasswordServices _passwordServices;
+        private readonly IJwtService _jwtService;
         IMapper _mapper;
 
-        public UsersService(IUsersRepository usersRepository, IpasswordServices passwordServices, IMapper imapper)
+        public UsersService(IUsersRepository usersRepository, IpasswordServices passwordServices, IMapper imapper, IJwtService jwtService)
         {
             _iUsersRepository = usersRepository;
             _passwordServices = passwordServices;
             _mapper = imapper;
-        }
-        public async Task<UserDTO> AddNewUser(UserDTO userDTO, string password)
-        {
-            User user = _mapper.Map<UserDTO, User>(userDTO);
-            user.Password = password;
-            User userResult = await _iUsersRepository.AddUser(user);
-            UserDTO userDTOres = _mapper.Map<User, UserDTO>(userResult);
-            if (_passwordServices.GetStrength(user.Password).Strength <= 2)
-                return null;
-            return userDTOres;
+            _jwtService = jwtService;
         }
 
-        public async Task<User> Login(ExisitingUser user)
+        public async Task<AuthResponseDTO?> AddNewUser(UserDTO userDTO, string password)
         {
-            return await _iUsersRepository.login(user.Email, user.Password);
+            if (_passwordServices.GetStrength(password).Strength <= 2)
+                return null;
+            User user = _mapper.Map<UserDTO, User>(userDTO);
+            user.Password = password;
+            user.Role = "User"; // default role on registration
+            User userResult = await _iUsersRepository.AddUser(user);
+            UserDTO userDTOres = _mapper.Map<User, UserDTO>(userResult);
+            string token = _jwtService.GenerateToken(userResult.Id, userResult.Email, userResult.FirstName, userResult.LastName, userResult.Role);
+            return new AuthResponseDTO(userDTOres, token);
+        }
+
+        public async Task<AuthResponseDTO?> Login(ExisitingUser user)
+        {
+            User? result = await _iUsersRepository.login(user.Email, user.Password);
+            if (result == null) return null;
+            string token = _jwtService.GenerateToken(result.Id, result.Email, result.FirstName, result.LastName, result.Role);
+            UserDTO userDTO = _mapper.Map<User, UserDTO>(result);
+            return new AuthResponseDTO(userDTO, token);
         }
 
         public async Task<bool> UpdateUser(int id, UserDTO userToUpdate, string password)

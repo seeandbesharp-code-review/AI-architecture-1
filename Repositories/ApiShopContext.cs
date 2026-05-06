@@ -133,6 +133,10 @@ public partial class ApiShopContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100)
                 .IsFixedLength();
+            entity.Property(e => e.Role)
+                .IsRequired()
+                .HasMaxLength(20)
+                .HasDefaultValue("User");
         });
 
         OnModelCreatingPartial(modelBuilder);

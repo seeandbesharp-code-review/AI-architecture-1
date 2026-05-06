@@ -5,6 +5,7 @@
         int id,
         string FirstName,
         string LastName,
-        string Email
+        string Email,
+        string Role = "User"
     );
 }
