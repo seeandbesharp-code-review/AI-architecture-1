@@ -33,6 +33,10 @@ namespace WebApiShop.Controllers
         [HttpPost]
         public async Task<ActionResult<OrdersDTO>> Post([FromBody] OrdersDTO orderDto)
         {
+            bool isValid = await _iOrderService.ValidateOrderSum(orderDto);
+            if (!isValid)
+                return BadRequest("Order sum does not match the total of the order items.");
+
             OrdersDTO orderResult = await _iOrderService.AddNewOrder(orderDto);
             return CreatedAtAction(nameof(GetById), new { id = orderResult.OrderId }, orderResult);
         }

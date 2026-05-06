@@ -7,5 +7,6 @@ namespace Services
     {
         Task<OrdersDTO> AddNewOrder(OrdersDTO orderDTO);
         Task<OrdersDTO> GetOrderById(int id);
+        Task<bool> ValidateOrderSum(OrdersDTO orderDTO);
     }
 }

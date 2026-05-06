@@ -5,9 +5,9 @@ namespace Services
 {
     public interface IUsersService
     {
-        Task<AuthResponseDTO?> AddNewUser(UserDTO userDTO, string password);
+        Task<AuthResponseDTO?> AddNewUser(PostUserDTO userDTO);
         Task<AuthResponseDTO?> Login(ExisitingUser user);
-        Task<bool> UpdateUser(int id, UserDTO userToUpdate, string password);
+        Task<bool> UpdateUser(int id, PostUserDTO userToUpdate);
         Task<UserDTO> GetById(int id);
     }
 }

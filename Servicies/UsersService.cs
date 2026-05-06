@@ -20,12 +20,11 @@ namespace Services
             _jwtService = jwtService;
         }
 
-        public async Task<AuthResponseDTO?> AddNewUser(UserDTO userDTO, string password)
+        public async Task<AuthResponseDTO?> AddNewUser(PostUserDTO userDTO)
         {
-            if (_passwordServices.GetStrength(password).Strength <= 2)
+            if (_passwordServices.GetStrength(userDTO.Password).Strength <= 2)
                 return null;
-            User user = _mapper.Map<UserDTO, User>(userDTO);
-            user.Password = password;
+            User user = _mapper.Map<PostUserDTO, User>(userDTO);
             user.Role = "User"; // default role on registration
             User userResult = await _iUsersRepository.AddUser(user);
             UserDTO userDTOres = _mapper.Map<User, UserDTO>(userResult);
@@ -42,15 +41,12 @@ namespace Services
             return new AuthResponseDTO(userDTO, token);
         }
 
-        public async Task<bool> UpdateUser(int id, UserDTO userToUpdate, string password)
+        public async Task<bool> UpdateUser(int id, PostUserDTO userToUpdate)
         {
-            if (_passwordServices.GetStrength(password).Strength <= 2)
-            {
+            if (_passwordServices.GetStrength(userToUpdate.Password).Strength <= 2)
                 return false;
-            }
-            User user = _mapper.Map<UserDTO, User>(userToUpdate);
+            User user = _mapper.Map<PostUserDTO, User>(userToUpdate);
             user.Id = id;
-            user.Password = password;
             await _iUsersRepository.UpdateUserAsync(user);
             return true;
         }

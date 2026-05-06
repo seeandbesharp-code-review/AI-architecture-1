@@ -14,6 +14,7 @@ namespace Services
         public AutoMapper() 
         {
             CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<PostUserDTO, User>();
             CreateMap<OrderItem, OrderItemDTO>().ReverseMap();
             CreateMap<Order, OrdersDTO>().ReverseMap();
             CreateMap<Product, ProductDTO>().ReverseMap();

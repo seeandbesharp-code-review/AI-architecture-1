@@ -13,10 +13,12 @@ namespace Services
     public class OrderService : IOrderService
     {
         IOrdersRepository _iOrdersRepository;
+        IProductReposetory _iProductReposetory;
         IMapper _mapper;
-        public OrderService(IOrdersRepository iOrdersRepository, IMapper mapper)
+        public OrderService(IOrdersRepository iOrdersRepository, IProductReposetory iProductReposetory, IMapper mapper)
         {
             _iOrdersRepository = iOrdersRepository;
+            _iProductReposetory = iProductReposetory;
             _mapper = mapper;
         }
 
@@ -32,6 +34,19 @@ namespace Services
             Order orderRes = await _iOrdersRepository.AddOrder(order);
             OrdersDTO orderDtoRes = _mapper.Map<Order, OrdersDTO>(orderRes);
             return orderDtoRes;
+        }
+
+        public async Task<bool> ValidateOrderSum(OrdersDTO orderDTO)
+        {
+            decimal expectedSum = 0;
+            foreach (var item in orderDTO.OrderItems)
+            {
+                Product? product = await _iProductReposetory.GetProductById(item.ProductId);
+                if (product == null)
+                    return false;
+                expectedSum += product.Price * item.Quantity;
+            }
+            return (int)expectedSum == orderDTO.OrderSum;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace WebApiShop.Controllers
 
         // GET: api/<ProductsController>
         [HttpGet]
-        public async Task<ActionResult<ProductRespone<ProductDTO>>> Get(int position, int skip, string? name, [FromQuery] int[]? categoryIds, string? description, int? maxPrice, int? minPrice, string? orderBy)
+        public async Task<ActionResult<ProductRespone<ProductDTO>>> Get(int position = 1, int skip = 10, string? name = null, [FromQuery] int[]? categoryIds = null, string? description = null, int? maxPrice = null, int? minPrice = null, string? orderBy = null)
         {
             var cacheKey = BuildProductsCacheKey(position, skip, name, categoryIds, description, maxPrice, minPrice, orderBy);
             var cachedValue = await _cache.GetStringAsync(cacheKey);

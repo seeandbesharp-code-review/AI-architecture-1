@@ -36,23 +36,16 @@ namespace Enteties.Controllers
             });
         }
         
-        // GET api/<UsersController>/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return Ok("value");
-        }
-        
         // POST api/<UsersController>
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<UserDTO>> Post([FromBody] UserDTO value, string password)
+        public async Task<ActionResult<UserDTO>> Post([FromBody] PostUserDTO value)
         {
-            AuthResponseDTO? response = await _iUsersServicies.AddNewUser(value, password);
+            AuthResponseDTO? response = await _iUsersServicies.AddNewUser(value);
             if (response == null)
                 return BadRequest("Password is too weak");
             AppendJwtCookie(response.Token);
-            return CreatedAtAction(nameof(Get), new { response.User.id }, response.User);
+            return CreatedAtAction(nameof(GetById), new { response.User.id }, response.User);
         }
         
         [HttpPost("login")]
@@ -72,14 +65,13 @@ namespace Enteties.Controllers
         
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDTO userToUpdate, string password)
+        public async Task<ActionResult<UserDTO>> UpdateUser(int id, [FromBody] PostUserDTO userToUpdate)
         {
-            bool passwordsStrenght = await _iUsersServicies.UpdateUser(id, userToUpdate, password);
-            if (passwordsStrenght)
-            {
-                return Ok(userToUpdate);
-            }
-            return NoContent();        
+            bool success = await _iUsersServicies.UpdateUser(id, userToUpdate);
+            if (!success)
+                return BadRequest("Password is too weak");
+            UserDTO updatedUser = await _iUsersServicies.GetById(id);
+            return Ok(updatedUser);
         }
 
         // GET api/<UsersController>/5
