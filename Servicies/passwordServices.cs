@@ -26,5 +26,16 @@ namespace Services
             }
             return null;
         }
+
+        public string HashPassword(string password)
+        {
+            string salt = BCrypt.Net.BCrypt.GenerateSalt(12);
+            return BCrypt.Net.BCrypt.HashPassword(password, salt);
+        }
+
+        public bool VerifyPassword(string password, string hash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
+        }
     }
 }

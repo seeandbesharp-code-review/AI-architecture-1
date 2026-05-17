@@ -87,35 +87,30 @@ namespace TestProject
 
         // Test for FindUser method (successful login)
         [Fact]
-        public async Task FindUser_ShouldReturnUser_WhenCredentialsMatch()
+        public async Task FindUser_ShouldReturnUser_WhenEmailExists()
         {
             // Arrange
             var user = new User { Email = "user1@test.com", Password = "password1", FirstName = "a", LastName = "b" };
             await _repository.AddUser(user); // Add user to DB
 
-            var loginUser = new ExisitingUser1 { Email = "user1@test.com", Password = "password1" };
-
             // Act
-            var result = await _repository.login(loginUser.Email, loginUser.Password);
+            var result = await _repository.login("user1@test.com");
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal("user1@test.com", result.Email);
-            Assert.Equal("password1", result.Password);
         }
 
-        // Test for FindUser method (unsuccessful login)
+        // Test for FindUser method (unsuccessful login - wrong email)
         [Fact]
-        public async Task FindUser_ShouldReturnNull_WhenCredentialsDoNotMatch()
+        public async Task FindUser_ShouldReturnNull_WhenEmailDoesNotExist()
         {
             // Arrange
             var user = new User { Email = "user1@test.com", Password = "password1", FirstName="a", LastName="b" };
             await _repository.AddUser(user); // Add user to DB
 
-            var loginUser = new ExisitingUser1 { Email = "user1@test.com", Password = "wrongpassword" };
-
             // Act
-            var result = await _repository.login(loginUser.Email, loginUser.Password);
+            var result = await _repository.login("notexist@test.com");
 
             // Assert
             Assert.Null(result);

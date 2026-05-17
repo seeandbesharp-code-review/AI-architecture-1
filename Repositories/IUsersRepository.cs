@@ -6,7 +6,7 @@ namespace Repositories
     public interface  IUsersRepository
     {
         Task<User> AddUser(User user);
-        Task<User> login(string email, string password);
+        Task<User?> login(string email);
         Task UpdateUserAsync(User userToUpdate);
         Task<User> GetById(int id);
     }

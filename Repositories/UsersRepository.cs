@@ -20,9 +20,9 @@ namespace Repositories
             return user;
         }
 
-        public async Task<User> login(string email, string password)
+        public async Task<User?> login(string email)
         {
-            return await _apiShopContext.Users.FirstOrDefaultAsync(x => x.Email == email && x.Password == password);
+            return await _apiShopContext.Users.FirstOrDefaultAsync(x => x.Email == email);
         }
 
         public async Task UpdateUserAsync(User userToUpdate)

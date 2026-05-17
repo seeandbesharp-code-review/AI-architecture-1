@@ -25,6 +25,7 @@ namespace Services
             if (_passwordServices.GetStrength(userDTO.Password).Strength <= 2)
                 return null;
             User user = _mapper.Map<PostUserDTO, User>(userDTO);
+            user.Password = _passwordServices.HashPassword(userDTO.Password);
             user.Role = "User"; // default role on registration
             User userResult = await _iUsersRepository.AddUser(user);
             UserDTO userDTOres = _mapper.Map<User, UserDTO>(userResult);
@@ -34,8 +35,8 @@ namespace Services
 
         public async Task<AuthResponseDTO?> Login(ExisitingUser user)
         {
-            User? result = await _iUsersRepository.login(user.Email, user.Password);
-            if (result == null) return null;
+            User? result = await _iUsersRepository.login(user.Email);
+            if (result == null || !_passwordServices.VerifyPassword(user.Password, result.Password)) return null;
             string token = _jwtService.GenerateToken(result.Id, result.Email, result.FirstName, result.LastName, result.Role);
             UserDTO userDTO = _mapper.Map<User, UserDTO>(result);
             return new AuthResponseDTO(userDTO, token);
@@ -46,6 +47,7 @@ namespace Services
             if (_passwordServices.GetStrength(userToUpdate.Password).Strength <= 2)
                 return false;
             User user = _mapper.Map<PostUserDTO, User>(userToUpdate);
+            user.Password = _passwordServices.HashPassword(userToUpdate.Password);
             user.Id = id;
             await _iUsersRepository.UpdateUserAsync(user);
             return true;
